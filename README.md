@@ -40,6 +40,12 @@ CSDN 好友文章链接整理助手，用于从 CSDN 页面和白名单私信对
 3. 在链接列表中筛选、忽略、导出待处理文章链接。
 4. 在私信页选择分组和固定文本，使用审核模式或队列处理模式完成白名单私信待办。
 
+## 界面预览
+
+| 链接工作台 | 白名单分组 | 私信处理 |
+| --- | --- | --- |
+| <img src="assets/screenshots/link-page.png" width="260" alt="链接工作台"> | <img src="assets/screenshots/whitelist-page.png" width="260" alt="白名单分组"> | <img src="assets/screenshots/message-page.png" width="260" alt="私信处理"> |
+
 ## 安装
 
 1. 打开 Chrome 或 Edge 的扩展管理页面。
