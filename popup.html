@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSDN助手</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <h1>CSDN助手</h1>
+        <p>链接汇总 · 白名单私信</p>
+      </div>
+      <div class="header-actions">
+        <button id="open-side-panel" type="button" title="点击网页时不会关闭">持久侧边栏</button>
+        <span class="privacy-badge">不读取密码 / Cookie / Token</span>
+      </div>
+    </header>
+
+    <nav class="tabs" aria-label="功能区">
+      <button class="tab-button active" type="button" data-tab="links">链接</button>
+      <button class="tab-button" type="button" data-tab="users">白名单</button>
+      <button class="tab-button" type="button" data-tab="messages">私信</button>
+      <button class="tab-button" type="button" data-tab="logs">日志</button>
+    </nav>
+
+    <main>
+      <section class="tab-panel active" id="tab-links">
+        <div class="link-hero">
+          <div class="link-hero-copy">
+            <span class="eyebrow">链接工作台</span>
+            <h2>采集、过滤、导出文章链接</h2>
+            <p>扫描当前页面或白名单对话，自动去重并避开自己的文章。</p>
+            <div class="hero-actions">
+              <button id="scan-page" class="primary" type="button">扫描当前 CSDN 页面</button>
+              <button id="clear-exported" type="button">清空已导出</button>
+              <button id="clear-all-links" class="danger" type="button">删除全部链接</button>
+            </div>
+          </div>
+          <img class="link-hero-image" src="assets/link-workbench.png" alt="">
+        </div>
+
+        <div class="summary-grid">
+          <div><span>待处理</span><strong id="pending-count">0</strong></div>
+          <div><span>已导出</span><strong id="exported-count">0</strong></div>
+          <div><span>已忽略</span><strong id="ignored-count">0</strong></div>
+        </div>
+
+        <section class="link-section">
+          <div class="section-heading">
+            <div>
+              <h2>白名单对话扫描</h2>
+              <p>复用当前标签页，按分组扫描最近 N 天私信里的文章链接。</p>
+            </div>
+          </div>
+          <div class="split-fields">
+            <label class="field">
+              <span>扫描分组</span>
+              <select id="scan-chat-group"></select>
+            </label>
+            <label class="field">
+              <span>最近天数（1-30）</span>
+              <input id="scan-chat-days" type="number" min="1" max="30" value="7">
+            </label>
+          </div>
+          <div class="toolbar compact-toolbar">
+            <button id="scan-whitelist-chats" type="button">扫描白名单对话链接</button>
+          </div>
+          <div id="whitelist-scan-progress" class="preview"></div>
+        </section>
+
+        <section class="link-section">
+          <div class="section-heading">
+            <div>
+              <h2>过滤规则</h2>
+              <p>作者 ID 命中后会自动进入已忽略，不参与导出。</p>
+            </div>
+          </div>
+          <label class="field">
+            <span>我的作者 ID</span>
+            <textarea id="own-author-ids" rows="2" placeholder="demo_author_x7p2&#10;demo_author_m9k4"></textarea>
+          </label>
+          <button id="save-own-author-ids" type="button">保存我的作者 ID</button>
+        </section>
+
+        <section class="link-section">
+          <div class="section-heading">
+            <div>
+              <h2>导入链接</h2>
+              <p>支持已有 URL 列表，也可以临时手动添加单批链接。</p>
+            </div>
+          </div>
+          <label class="field">
+            <span>批量导入</span>
+            <textarea id="import-links" rows="3" placeholder="支持普通 URL 列表、JSON 数组或 JS 数组"></textarea>
+          </label>
+          <div class="toolbar compact-toolbar">
+            <button id="import-links-button" type="button">导入链接</button>
+          </div>
+
+          <label class="field">
+            <span>手动添加</span>
+            <textarea id="manual-links" rows="3" placeholder="每行一个 CSDN 文章链接"></textarea>
+          </label>
+          <div class="toolbar compact-toolbar">
+            <button id="add-manual-links" type="button">添加到待处理</button>
+          </div>
+        </section>
+
+        <section class="link-section">
+          <div class="section-heading">
+            <div>
+              <h2>导出</h2>
+              <p>默认只导出待处理链接，自己的文章会始终排除。</p>
+            </div>
+          </div>
+          <div class="export-row">
+            <label class="check-field">
+              <input id="export-pending" type="checkbox" checked>
+              <span>待处理</span>
+            </label>
+            <label class="check-field">
+              <input id="export-exported" type="checkbox">
+              <span>已导出</span>
+            </label>
+            <label class="check-field">
+              <input id="export-ignored" type="checkbox">
+              <span>已忽略</span>
+            </label>
+          </div>
+          <div class="toolbar compact-toolbar">
+            <button id="export-js" class="primary" type="button">复制 JS 数组</button>
+            <button id="export-json" type="button">复制 JSON</button>
+          </div>
+        </section>
+
+        <section class="link-section">
+          <div class="section-heading">
+            <div>
+              <h2>链接列表</h2>
+              <p>可逐条改状态、忽略或删除。</p>
+            </div>
+          </div>
+          <div id="link-list" class="list"></div>
+        </section>
+      </section>
+
+      <section class="tab-panel" id="tab-users">
+        <label class="field">
+          <span>导入到分组</span>
+          <select id="group-name"></select>
+        </label>
+
+        <div class="group-create">
+          <label class="field">
+            <span>新建分组</span>
+            <input id="new-group-name" type="text" placeholder="输入分组名">
+          </label>
+          <button id="add-group" type="button">新建</button>
+        </div>
+
+        <label class="field">
+          <span>用户ID、私信链接或主页 URL 数组</span>
+          <textarea id="user-import" rows="6" placeholder="demo_user_a7f3&#10;demo_user_b8q2&#10;https://i.csdn.net/#/msg/chat/demo_user_a7f3&#10;https://blog.csdn.net/demo_author_m9k4"></textarea>
+        </label>
+
+        <div class="toolbar">
+          <button id="import-users" class="primary" type="button">导入白名单</button>
+          <label class="file-button">
+            导入 TXT
+            <input id="user-file-import" type="file" accept=".txt,text/plain">
+          </label>
+          <button id="export-users-txt" type="button">导出 TXT</button>
+          <button id="add-current-chat-user" type="button">添加当前私信页</button>
+        </div>
+        <h2 class="section-title">分组管理</h2>
+        <div id="user-list" class="list"></div>
+      </section>
+
+      <section class="tab-panel" id="tab-messages">
+        <label class="field">
+          <span>发送分组</span>
+          <select id="send-group"></select>
+        </label>
+
+        <label class="field">
+          <span>固定私信内容</span>
+          <textarea id="send-message" rows="5" placeholder="输入要发送的固定文本"></textarea>
+        </label>
+
+        <div class="split-fields">
+          <label class="field">
+            <span>发送间隔（秒）</span>
+            <input id="send-delay" type="number" min="3" value="6">
+          </label>
+          <label class="check-field">
+            <input id="review-mode" type="checkbox" checked>
+            <span>审核模式：只填入，不自动发送</span>
+          </label>
+        </div>
+
+        <div class="notice">
+          系统会复用启动任务时的当前标签页；已缓存或可推导的会话优先只切换私信 iframe，必要时刷新兜底。
+        </div>
+
+        <div id="send-preview" class="preview"></div>
+
+        <div class="toolbar">
+          <button id="start-send" class="primary" type="button">开始处理</button>
+          <button id="pause-send" type="button">暂停</button>
+          <button id="resume-send" type="button">继续</button>
+          <button id="retry-failed" type="button">重试失败</button>
+        </div>
+
+        <div id="send-run" class="list"></div>
+      </section>
+
+      <section class="tab-panel" id="tab-logs">
+        <div class="toolbar">
+          <button id="clear-local-data" type="button">清空本地数据</button>
+        </div>
+        <div id="log-list" class="list"></div>
+      </section>
+    </main>
+
+    <div id="toast" role="status" aria-live="polite"></div>
+
+    <script src="core.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

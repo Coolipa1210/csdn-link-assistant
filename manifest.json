@@ -1,0 +1,41 @@
+{
+  "manifest_version": 3,
+  "name": "CSDN助手",
+  "version": "0.1.0",
+  "description": "自用的 CSDN 链接汇总与白名单私信助手，不读取密码、Cookie 或 Token。",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "CSDN助手"
+  },
+  "side_panel": {
+    "default_path": "popup.html"
+  },
+  "permissions": [
+    "activeTab",
+    "sidePanel",
+    "scripting",
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://*.csdn.net/*",
+    "https://csdn.net/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.csdn.net/*",
+        "https://csdn.net/*"
+      ],
+      "js": [
+        "core.js",
+        "content.js"
+      ],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ]
+}

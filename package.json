@@ -1,0 +1,9 @@
+{
+  "name": "csdn-assistant-extension",
+  "version": "0.1.0",
+  "private": true,
+  "description": "自用 CSDN 链接汇总与白名单私信浏览器插件",
+  "scripts": {
+    "test": "node --test"
+  }
+}
